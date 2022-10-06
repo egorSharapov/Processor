@@ -1,0 +1,7 @@
+CP 2
+push 10
+push 2
+push 36
+mul
+mul
+out
