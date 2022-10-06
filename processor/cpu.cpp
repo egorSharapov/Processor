@@ -56,26 +56,37 @@ int * open_n_read (const char * file_name, unsigned long *size)
     return commands_arr;
 }
 
-
-void cpu_dump ( Stack_t *stack, int *commands_array, int index)
+void cpu_dump (FILE *dump_file, Stack_t *stack, int *commands_array, int index)
 {
-    fprintf (stdout, "__________________________________\n");
+    size_t lenght = _msize (commands_array)/sizeof(commands_array[0]);
+
+    for (unsigned ind = 1; ind < lenght; ind++)
+        fprintf (dump_file, "|%2d", ind);
     
-    for (int ind = 1; ind < _msize (commands_array)/sizeof(commands_array[0]); ind++)
-        fprintf (stdout, "|%2d", commands_array[ind]);
+    fprintf (dump_file, "|\n");
     
-    fprintf (stdout, "|\n");
+    for (unsigned ind = 1; ind <lenght; ind++)
+        fprintf (dump_file, "|==");
+
+    fprintf (dump_file, "|\n");
+
+    for (unsigned ind = 1; ind < lenght; ind++)
+        fprintf (dump_file, "|%2d", commands_array[ind]);
+    
+    fprintf (dump_file, "|\n");
+    
     index -= 2;
+    
     while (index--)
-        fprintf (stdout, "___");
+        fprintf (dump_file, "___");
     
-    fprintf (stdout, "_/\\");
+    fprintf (dump_file, "_/\\");
     
-    stack_dump (stdout, stack, FULL);
+    stack_dump (dump_file, stack, FULL);
 }
 
 
-int soft_cpu (Stack_t *stack, int *commands_array, unsigned long size)
+int soft_cpu (Stack_t *stack, int *commands_array, unsigned long size, FILE* dump_file)
 {
     const int version = 2;
     int command = 0;
@@ -96,6 +107,7 @@ int soft_cpu (Stack_t *stack, int *commands_array, unsigned long size)
         {
         case PUSH: 
         {
+            //cpu_dump (dump_file, stack, commands_array, index);
             int val = commands_array[index++];
             stack_push (stack, val);
             break;
@@ -115,6 +127,7 @@ int soft_cpu (Stack_t *stack, int *commands_array, unsigned long size)
         }
         case MUL:
         {
+            //cpu_dump (dump_file, stack, commands_array, index);
             stack_push (stack, stack_pop (stack)*stack_pop (stack));
             break;
         }
@@ -130,7 +143,7 @@ int soft_cpu (Stack_t *stack, int *commands_array, unsigned long size)
         }
         case OUT:
         {
-            cpu_dump (stack, commands_array, index);
+            cpu_dump (dump_file, stack, commands_array, index);
             print_stack_data (stdout, 0, stack_pop(stack));
             break;
         }
@@ -139,4 +152,5 @@ int soft_cpu (Stack_t *stack, int *commands_array, unsigned long size)
         }
 
     }
+    return 0;
 }
