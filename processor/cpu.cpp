@@ -85,18 +85,26 @@ void cpu_dump (FILE *dump_file, Stack_t *stack, int *commands_array, int index)
     stack_dump (dump_file, stack, FULL);
 }
 
+static void chech_title (int *commands_array)
+{
+    int index = 0;
+
+    if (commands_array[index++] != 'C' or commands_array[index++] != 'P')
+        printf ("wrong title");
+    
+    if (commands_array[index++] != version)
+        printf ("buy new processor");
+
+}
+
 
 int soft_cpu (Stack_t *stack, int *commands_array, unsigned long size, FILE* dump_file)
 {
-    const int version = 2;
     int command = 0;
     int index   = 0;
     
-    if (commands_array[index++] != version)
-    {
-        printf ("buy new processor");
-        return 0;
-    }
+
+    chech_title (commands_array);
 
     
     while (size--)

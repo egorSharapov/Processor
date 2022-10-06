@@ -6,6 +6,9 @@
 #include "C:\Users\Egor\projects\processor\enum_args.h"
 #include "stack.hpp"
 
+
+const int version = 2;
+
 int *open_n_read (const char * file_name, unsigned long *size);
 void cpu_dump (FILE *dump_file, Stack_t *stack, int *commands_array, int index);
 
