@@ -5,4 +5,4 @@ CXFLAGS = 	-Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-e
 			-Wwrite-strings -D_EJUDGE_CLIENT_SIDE
 
 release:
-	g++ $(CXFLAGS) main.cpp cpu.cpp stack_functions.cpp check_stack.cpp -DNDEBUG -o prog
+	g++ $(CXFLAGS) main.cpp cpu.cpp C:\Users\Egor\projects\processor\cpu\stack\stack_functions.cpp C:\Users\Egor\projects\processor\cpu\stack\check_stack.cpp -DNDEBUG -o prog

@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "C:\Users\Egor\projects\processor\enum_args.h"
-#include "stack.hpp"
+#include "C:\Users\Egor\projects\processor\cpu\stack\stack.hpp"
 
 
 const int version = 2;

@@ -2,7 +2,7 @@
 #include <ctype.h>
 #include <assert.h>
 #include "cpu.hpp"
-#include "check_stack.hpp"
+#include "C:\Users\Egor\projects\processor\cpu\stack\check_stack.hpp"
 #include <malloc.h>
 
 static unsigned long file_size_count (const char * file_name)
