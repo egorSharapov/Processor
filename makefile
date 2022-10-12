@@ -23,6 +23,19 @@ main_assembler.o:
 	$(CC) -c $(CFLAGS) assembler/main.cpp -o $(OBJ_FOLDER)main_assembler.o
 
 
+
+disassembler: disasm.o main_disassembler.o
+	$(CC)  $(OBJ_FOLDER)disasm.o $(OBJ_FOLDER)main_disassembler.o -o disassembler
+
+
+disasm.o: 
+	$(CC) -c $(CFLAGS) disassembler/disassembler.cpp -o $(OBJ_FOLDER)disasm.o
+
+main_disassembler.o:
+	$(CC) -c $(CFLAGS) disassembler/main.cpp -o $(OBJ_FOLDER)main_disassembler.o
+
+open:
+	$(CC) open.cpp -o open
 # processor: cpu.o main_cpu.o stack.o:
 # 	$(OBJ_FOLDER)cpu.o  $(OBJ_FOLDER)main_cpu.o $(OBJ_FOLDER)stack.o -o processor
 
