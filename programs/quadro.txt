@@ -1,0 +1,61 @@
+
+JMP start
+
+one_root:
+    PUSH bx
+    PUSH 0
+    SUB
+    PUSH cx
+    DIV
+    OUT
+    HLT
+
+two_roots:
+    PUSH ax
+    PUSH 2
+    MUL
+    PUSH dx
+    PUSH bx
+    PUSH -1
+    MUL
+    ADD
+    DIV
+    OUT
+
+    PUSH ax
+    PUSH 2
+    MUL
+    PUSH dx
+    PUSH -1
+    MUL
+    PUSH bx
+    PUSH -1
+    MUL
+    ADD
+    DIV
+    OUT
+    HLT
+
+start:
+    IN
+    POP ax
+    IN
+    POP bx
+    IN
+    POP cx
+    PUSH bx
+    PUSH bx
+    MUL
+    PUSH cx
+    PUSH ax
+    MUL
+    PUSH -4
+    MUL
+    ADD
+    SQRT
+    POP dx
+
+PUSH ax
+PUSH 0
+JE one_root
+JMP two_roots
