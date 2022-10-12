@@ -5,6 +5,6 @@ CXFLAGS = 	-Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-e
 			-Wwrite-strings -D_EJUDGE_CLIENT_SIDE
 
 release:
-	g++ $(CXFLAGS) main.cpp assembler.cpp -o prog
+	@g++ $(CXFLAGS) main.cpp assembler.cpp file_analyze.cpp -o assembler
 
 

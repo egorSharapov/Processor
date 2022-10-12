@@ -3,164 +3,223 @@
 #include <ctype.h>
 #include <string.h>
 #include <malloc.h>
+#define BINARY_PATTERN "%*c%c%c %c%c%c%c%c"
+#define BYTE_TO_BINARY(byte)  \
+  (byte & 0x80 ? '1' : '0'), \
+  (byte & 0x40 ? '1' : '0'), \
+  (byte & 0x20 ? '1' : '0'), \
+  (byte & 0x10 ? '1' : '0'), \
+  (byte & 0x08 ? '1' : '0'), \
+  (byte & 0x04 ? '1' : '0'), \
+  (byte & 0x02 ? '1' : '0'), \
+  (byte & 0x01 ? '1' : '0')
 
-//--------------------------------------------------------------------------------------------------
+//--------------------------------------------------------------------------------------------------------------------
 
-static long file_size_count (const char * file_name)
-{
-    assert (file_name != NULL);
+#define DEF_CMD(cmd_name, cmd_num, arg_type, code)  \
+    if (strcmp (cmd, #cmd_name) == 0)         \
+    {                                         \
+        ip += sizeof (char);                  \
+        mark_args (arg_type, arg_point, &ip); \
+    }                                                                     
 
-    struct stat buff = {};
-    buff.st_size = 0;
-
-    stat(file_name, &buff);
-
-    return buff.st_size;
-}
-
-//--------------------------------------------------------------------------------------------------
-
-void counting_strings (Text * text)
-{
-    assert (text != NULL);
-
-    text->source [text->count_of_symbols] = '\0';
-    
-    char * point = text->source;
-    
-    while ((point = strchr (point, '\n')) != NULL)
-    {
-        *point++ = '\0';
-        text->count_of_strings++;
-    }
-    text->count_of_strings++;
-
-}
-
-//--------------------------------------------------------------------------------------------------
-
-ERRORS_CODE count_and_read (const char *file_name, Text * text)
-{
-    assert (text       != NULL);
-    assert (file_name  != NULL);
-
-    FILE * input_file = fopen (file_name, "rb");
-
-    if (!input_file)
-        return FALL;
-
-    long file_size = file_size_count (file_name);
-    
-    text->source = (char *) calloc ((file_size + 2), sizeof (char));
-
-    if (text->source == NULL)
-        return NO_MEM_ERROR;
-    
-    text->count_of_symbols = fread (text->source, sizeof(char), file_size, input_file);
-
-    if (file_size != text->count_of_symbols)
-        return ERROR;
-
-    counting_strings (text);
-    
-    text->buffer = (int*) calloc (2*(text->count_of_strings)*sizeof (int), 1);
-    
-    if (text->buffer == NULL)
-    {
-        printf ("calloc buffer error");
-        return NO_MEM_ERROR;
-    }
-    
-    if (fclose (input_file) != 0)
-    {
-        printf ("close file %s error", file_name);
-        return ERROR;
-    }
-
-    return SUCCESS;
-}
-
-//--------------------------------------------------------------------------------------------------
-
-void create_pointers (Text * text)
-{
-    assert (text);
-
-    text->command_args = (Line *) calloc (text->count_of_strings, sizeof (Line));
-    printf ("source = %u\n", _msize (text->command_args));
-    int index_of_string = 0;
-    char * point = text->source;
-    
-    text->command_args [index_of_string].string_point = point;
-    while (index_of_string++ < text->count_of_strings)
-    {
-        point += strlen (point);
-        point++;
-        text->command_args [index_of_string].string_point = point;
-        text->command_args [index_of_string - 1].string_len = point - text->command_args [index_of_string - 1].string_point - 2;
-    }
-
-}
-
-//--------------------------------------------------------------------------------------------------
-
-void write_to_output_file (Text *source_buf, const char* output_file_name)
+Mark* mark_source (Text *source)
 {
     int line = 0;
-    char cmd[5] = {};
-    int index = 0;
+    int ip   = 3;
+    char *arg_point = NULL;
+    
+    Mark *marks = (Mark *) calloc (source->count_of_strings, sizeof (Mark));
+
+    while (line < source->count_of_strings)
+    {
+        char *point = strchr (source->command_args[line].string_point, ':');
+        char cmd[5] = {};
+
+        if (point)
+            marks[line].mark_word = source->command_args[line].string_point;
+        else
+            sscanf (source->command_args[line].string_point, "%s", cmd);
+
+        marks[line].mark_ip = ip;
+        
+        printf ("cmd = %s\nip = %d\n\n", source->command_args[line].string_point, marks[line].mark_ip);
+
+        arg_point = strstr (source->command_args[line].string_point, cmd);
+
+            
+        #include "C:\Users\Egor\projects\processor\def_cmd.hpp"
+
+        line++;
+    }
+    printf ("mark succes\n");
+    return marks;
+
+}
+#undef DEF_CMD
+
+//--------------------------------------------------------------------------------------------------------------------
+
+int set_jmp_point (Mark *marks, const char *jmp_word)
+{
+    assert (marks);
+    for (unsigned index = 0; index < _msize (marks)/sizeof (marks[0]); index++)
+    {
+        if (marks[index].mark_word != NULL)
+        {
+            if (strncmp (marks[index].mark_word, jmp_word, strlen (jmp_word) - 1) == 0)
+            {
+                printf ("found!\n");
+                return marks[index].mark_ip;
+            }
+        }
+    }
+            
+    printf ("not found!\n");
+    return (-1);
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+#define DEF_CMD(cmd_name, cmd_num, args, ...)                             \
+    if (strcmp (cmd, #cmd_name) == 0)                                     \
+    {                                                                     \
+        source_buf->code[ip++] = CMD_##cmd_name;                          \
+        if (args) write_args (args, arg_pointer, source_buf, marks, &ip); \
+    }                                                                     
+
+void assemble (Text *source_buf, Mark *marks, const char* output_file_name)
+{
+    int line = 0;
+    int ip = 0;
+    char *arg_pointer = NULL;
+
+    source_buf->code[ip++] = 'C';
+    source_buf->code[ip++] = 'P';
+            
+    source_buf->code[ip++] = 2;
 
     while (line < source_buf->count_of_strings)
     {
+        
+        if (marks[line].mark_word)
+        {
+            line++;
+            continue;
+        }
+            
+        char cmd[5] = {};
         sscanf (source_buf->command_args[line].string_point, "%s", cmd);
 
-        if (strcmp (cmd, "CP") == 0)
-        {
-            int version = -1;
-            sscanf (strstr (source_buf->command_args[line].string_point, cmd) + strlen(cmd), "%d", &version);
-            printf ("version = %d\n", version);
-            source_buf->buffer[index++] = version;
-        }
-        if (strcmp (cmd, "push") == 0)
-        {
-            int val = 0;
-            
-            IS_OK (sscanf (strstr (source_buf->command_args[line].string_point, cmd) + strlen(cmd), "%d", &val))
-            
-            source_buf->buffer[index++] = PUSH;
-            source_buf->buffer[index++] = val;
+        arg_pointer = strstr (source_buf->command_args[line].string_point, cmd) + strlen (cmd);
+        arg_pointer = skip_space (arg_pointer);
+       
+        #include "C:\Users\Egor\projects\processor\def_cmd.hpp"
 
-        }
-        if (strcmp (cmd, "in") == 0)
-            source_buf->buffer[index++] = IN;
-
-        if (strcmp (cmd, "add") == 0)
-            source_buf->buffer[index++] = ADD;
-
-        if (strcmp (cmd, "sub") == 0)
-            source_buf->buffer[index++] = SUB;
-
-        if (strcmp (cmd, "mul") == 0)
-            source_buf->buffer[index++] = MUL;
-
-        if (strcmp (cmd, "div") == 0)
-            source_buf->buffer[index++] = DIV;
-        
-        if (strcmp (cmd, "out") == 0)
-            source_buf->buffer[index++] = OUT;
-        
         line++;
     }
-
+    
+    printf ("lexer succes\n");
     FILE *output_file = open_file (output_file_name);
-    printf ("%d\n", _msize (source_buf->buffer));
-
-    printf ("number = %d\n", fwrite (source_buf->buffer, sizeof(int), index, output_file));
-    printf ("number = %d\n", index);
-
+    fwrite (source_buf->code, sizeof (char), ip, output_file);
+    printf ("write succes\n");
     fclose (output_file);
 }
 
+#undef DEF_CMD
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void write_args (int arg_type, char *arg_pointer, Text *source_buf, Mark *marks, int *ip)                                                      
+{                            
+    int jmp_point = 0;
+
+    if (arg_type == 1)                                                             
+    {                                                                          
+        if (is_ram (arg_pointer))
+            source_buf->code[*ip - 1] = source_buf->code[*ip - 1] | (char) ARG_MEM;
+
+        set_args (arg_pointer, source_buf->code, ip);
+    }
+    else if (arg_type == 2)
+    {
+        char reg[3] = {};
+
+        if (is_ram (arg_pointer))
+        {
+            source_buf->code[*ip - 1] = source_buf->code[*ip - 1] | (char) ARG_MEM;
+            set_args (arg_pointer, source_buf->code, ip);
+        }
+        else
+        {
+            IS_OK (sscanf (arg_pointer, "%s", reg))
+            
+            source_buf->code[*ip - 1] = source_buf->code[*ip - 1] | ARG_REG;
+            source_buf->code[*ip] = is_register (reg);
+            *ip += 1;
+        }
+    }
+    else if (arg_type == 3)
+    {
+        if (sscanf (arg_pointer, "%d", &jmp_point) == 1)
+            set_val (source_buf->code, ip, marks[jmp_point].mark_ip);
+        else
+            set_val (source_buf->code, ip, set_jmp_point (marks, arg_pointer));
+    }
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void mark_args (int arg_type, char *arg_point, int *ip)
+{
+
+    if ((arg_type == 1) or (arg_type == 2))
+    {
+        if (strchr (arg_point, '+'))
+        *ip += 2*sizeof (char) + 2*sizeof (int);
+            
+        else if (strchr (arg_point, 'x'))
+            *ip += sizeof (char);     
+        else
+            *ip += sizeof (int);
+    }
+    else if (arg_type == 3)
+        *ip += sizeof (int);
+    
+}
+
+//--------------------------------------------------------------------------------------------------------------------
+
+void pretty_listing (Text *strings, Mark *marks)
+{
+    FILE *listing_file = open_file ("C:\\Users\\Egor\\projects\\processor\\output\\listing.txt");
+
+    fprintf (listing_file, " ip   command         irm  id   args\n");
+    for (int index = 1; index < strings->count_of_strings; index++)
+    {
+        int ip = marks[index].mark_ip;
+
+        char *pointer = strings->command_args[index].string_point;
+        int str_len   = strings->command_args[index].string_len;
+
+        fprintf (listing_file, "[%02hX] ", ip);
+
+        fprintf (listing_file, " %s", pointer);
+
+        if ((marks[index].mark_word == NULL) and (str_len != 0))
+            fprintf (listing_file, BINARY_PATTERN, 16 - str_len, BYTE_TO_BINARY(strings->code[ip]));
+
+        if ((marks[index + 1].mark_ip - ip) > 1)
+            fprintf(listing_file, "  %02d", strings->code[ip + 1]);
+
+        fprintf(listing_file, "\n");
+ 
+    }
+    
+    fclose (listing_file);
+}
+
+//--------------------------------------------------------------------------------------------------------------------
 
 FILE *open_file (const char* output_file_name)
 {
@@ -172,4 +231,3 @@ FILE *open_file (const char* output_file_name)
     return file;
 
 }
-
