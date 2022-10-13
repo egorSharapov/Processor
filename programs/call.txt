@@ -1,0 +1,5 @@
+PUSH 100
+POP ax
+PUSH 200+ax
+OUT
+HLT
