@@ -9,6 +9,8 @@ CFLAGS = 	-Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-eq
 
 OBJ_FOLDER = object_files/
 
+all: assembler disassembler
+
 assembler: file_analyze.o asm.o main_assembler.o
 	$(CC) $(OBJ_FOLDER)file_analyze.o  $(OBJ_FOLDER)asm.o $(OBJ_FOLDER)main_assembler.o -o assembler
 
@@ -25,7 +27,7 @@ main_assembler.o:
 
 
 disassembler: disasm.o main_disassembler.o
-	$(CC)  $(OBJ_FOLDER)disasm.o $(OBJ_FOLDER)main_disassembler.o -o disassembler
+	$(CC)  $(OBJ_FOLDER)disasm.o $(OBJ_FOLDER)main_disassembler.o -o $(OBJ_FOLDER)disassembler
 
 
 disasm.o: 
@@ -34,19 +36,25 @@ disasm.o:
 main_disassembler.o:
 	$(CC) -c $(CFLAGS) disassembler/main.cpp -o $(OBJ_FOLDER)main_disassembler.o
 
+
+processor: cpu.o main_cpu.o stack.o check_stack.o
+	$(CC) $(OBJ_FOLDER)cpu.o  $(OBJ_FOLDER)main_cpu.o $(OBJ_FOLDER)stack.o $(OBJ_FOLDER)check_stack.o -o processor
+
+cpu.o:
+	$(CC) -c $(CFLAGS) cpu/cpu.cpp -o $(OBJ_FOLDER)cpu.o
+
+main_cpu.o:
+	$(CC) -c $(CFLAGS) cpu/main.cpp -o $(OBJ_FOLDER)main_cpu.o
+
+check_stack.o:
+	$(CC) -c $(CFLAGS) cpu/stack/check_stack.cpp -o $(OBJ_FOLDER)check_stack.o
+
+stack.o:
+	$(CC) -c $(CFLAGS) cpu/stack/stack_functions.cpp -o $(OBJ_FOLDER)stack.o
+
 open:
 	$(CC) open.cpp -o open
-# processor: cpu.o main_cpu.o stack.o:
-# 	$(OBJ_FOLDER)cpu.o  $(OBJ_FOLDER)main_cpu.o $(OBJ_FOLDER)stack.o -o processor
 
-# cpu.o:
-# 	$(CC) -c $(CFLAGS) cpu/cpu.cpp -o $(OBJ_FOLDER)cpu.o
 
-# main_cpu.o:
-# 	$(CC) -c $(CFLAGS) cpu/main.cpp -o $(OBJ_FOLDER)main_cpu.o
-
-# stack.o:
-# 	$(CC) -c $(CFLAGS) cpu/stack/stack.cpp cpu/stack/stack_functions.cpp -DNDEBUG -o $(OBJ_FOLDER)stack.o
-
-clean:
-	rm -rf *.o $(OBJ_FOLDER)asm
+# clean:
+# 	rm -rf $(OBJ_FOLDER)*.o
