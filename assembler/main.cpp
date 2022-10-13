@@ -2,7 +2,7 @@
 #include "file_analyze.hpp"
 #include <malloc.h>
 
-const char *file_path = "C:\\Users\\Egor\\projects\\processor\\programs\\quadro.txt";
+const char *file_path = "C:\\Users\\Egor\\projects\\processor\\programs\\call.txt";
 const char *output_file_name = "C:\\Users\\Egor\\projects\\processor\\assembler.out";
 
 int main (int argc, const char *argv[])

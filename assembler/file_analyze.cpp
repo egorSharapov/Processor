@@ -137,7 +137,7 @@ void set_reg (char *code, int *ip, const char *reg)
         code[*ip - 1] = code[*ip - 1] | ARG_REG;
         
         code[*ip] = reg_number;
-        *ip += 1;
+        *ip += sizeof (char);
     }
 }
 
@@ -174,8 +174,18 @@ void set_args (char *arg_point, char *code, int *ip)
 
     if (sscanf (arg_point, "%d+%s", &val, reg) == 2)
     {
-        set_val (code, ip, val);
-        set_reg (code, ip, reg);
+        code[*ip - 1] = code[*ip - 1] | (ARG_REG | ARG_IMMED);
+
+        *(int*)(code + *ip) = val;
+        *ip += sizeof (int);
+
+        char reg_number = is_register (reg);
+
+        if (reg_number != 0)
+            code[*ip] = reg_number;
+            
+        *ip += sizeof (char);
+
         code[*ip] = CMD_ADD;
         *ip += sizeof (char);
     }

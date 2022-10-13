@@ -176,7 +176,7 @@ void mark_args (int arg_type, char *arg_point, int *ip)
     if ((arg_type == 1) or (arg_type == 2))
     {
         if (strchr (arg_point, '+'))
-        *ip += 2*sizeof (char) + 2*sizeof (int);
+        *ip += 2*sizeof (char) + sizeof (int);
             
         else if (strchr (arg_point, 'x'))
             *ip += sizeof (char);     
@@ -194,8 +194,8 @@ void pretty_listing (Text *strings, Mark *marks)
 {
     FILE *listing_file = open_file ("C:\\Users\\Egor\\projects\\processor\\output\\listing.txt");
 
-    fprintf (listing_file, " ip   command         irm  id   args\n");
-    for (int index = 1; index < strings->count_of_strings; index++)
+    fprintf (listing_file, " ip   command         mri  id   args\n");
+    for (int index = 0; index < strings->count_of_strings; index++)
     {
         int ip = marks[index].mark_ip;
 
@@ -209,8 +209,17 @@ void pretty_listing (Text *strings, Mark *marks)
         if ((marks[index].mark_word == NULL) and (str_len != 0))
             fprintf (listing_file, BINARY_PATTERN, 16 - str_len, BYTE_TO_BINARY(strings->code[ip]));
 
-        if ((marks[index + 1].mark_ip - ip) > 1)
+        if ((marks[index + 1].mark_ip - ip) == 7)
+        {
+            fprintf(listing_file, "  %02d", *(int*) (strings->code + ip + 1));
+            fprintf(listing_file, " %02d", strings->code[ip + 1 + sizeof(int)]);
+        }
+        else if ((marks[index + 1].mark_ip - ip) == 5)
+            fprintf(listing_file, "  %02d", *(int*) (strings->code + ip + 1));
+        
+        else if ((marks[index + 1].mark_ip - ip) == 2)
             fprintf(listing_file, "  %02d", strings->code[ip + 1]);
+        
 
         fprintf(listing_file, "\n");
  
