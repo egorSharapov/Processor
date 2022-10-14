@@ -1,0 +1,64 @@
+PUSH 4
+POP dx
+
+PUSH 0
+POP ax
+
+PUSH 1
+POP bx
+
+circle:
+CALL count_x
+metka:
+
+PUSH -5+ax
+PUSH -5+ax
+MUL
+PUSH -5+bx
+PUSH -5+bx
+MUL
+PUSH 3
+MUL
+ADD
+SQRT
+PUSH dx
+CALL counter
+JA write_0
+JMP write_space
+
+count_x:
+    PUSH 1+ax
+    POP ax
+    PUSH ax
+    PUSH 10
+    JE count_y
+    RET
+
+count_y:
+    PUSH 0
+    POP ax
+    PUSH 1+bx
+    POP bx
+    PUSH bx
+    PUSH 10
+    JE end
+    JMP metka
+
+end:
+    ROUT
+    HLT
+
+write_0:
+    PUSH 111
+    POP [cx]
+    JMP circle
+
+write_space:
+    PUSH 32
+    POP [cx]
+    JMP circle
+
+counter:
+    PUSH 1+cx
+    POP cx
+    RET

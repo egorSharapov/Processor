@@ -1,10 +1,71 @@
 
-JMP start
+IN
+POP ax
+IN
+POP bx
+IN
+POP cx
+
+PUSH ax
+PUSH 0
+JE zero_a
+
+PUSH bx
+PUSH bx
+MUL
+PUSH cx
+PUSH ax
+MUL
+PUSH -4
+MUL
+ADD
+SQRT
+POP dx
+
+JMP two_roots
+
+end:
+    HLT
+
+zero_a:
+    PUSH bx
+    PUSH 0
+    JE zero_b
+    JMP one_root
+
+zero_b:
+    PUSH cx
+    PUSH 0
+    JE inf_roots
+    PUSH 122
+    POP [0]
+    PUSH 101
+    POP [1]
+    PUSH 114
+    POP [2]
+    PUSH 111
+    POP [3]
+    PUSH -1
+    POP [4]
+    SOUT
+    JMP end
+
+inf_roots:
+    PUSH 105
+    POP [0]
+    PUSH 110
+    POP [1]
+    PUSH 102
+    POP [2]
+    PUSH -1
+    POP [3]
+    SOUT
+    JMP end
 
 one_root:
     PUSH bx
-    PUSH 0
-    SUB
+    PUSH -1
+    MUL
     PUSH cx
     DIV
     OUT
@@ -34,28 +95,17 @@ two_roots:
     ADD
     DIV
     OUT
-    HLT
+    JMP end
 
-start:
-    IN
-    POP ax
-    IN
-    POP bx
-    IN
-    POP cx
-    PUSH bx
-    PUSH bx
-    MUL
-    PUSH cx
-    PUSH ax
-    MUL
-    PUSH -4
-    MUL
-    ADD
-    SQRT
-    POP dx
 
-PUSH ax
-PUSH 0
-JE one_root
-JMP two_roots
+print_x:
+    PUSH 120
+    POP [0]
+    PUSH 32
+    POP [1]
+    PUSH 61
+    POP [2]
+    PUSH -1
+    POP [3]
+    SOUT
+    RET

@@ -1,5 +1,78 @@
-PUSH 100
+PUSH 0
 POP ax
-PUSH 200+ax
-OUT
+
+CALL write_space
+CALL write_space
+CALL write_space
+CALL write_0
+CALL write_0
+CALL write_0
+CALL write_0
+CALL write_0
+CALL write_space
+CALL write_space
+CALL write_space
+CALL write_space
+CALL write_0
+CALL write_space
+CALL write_space
+CALL write_space
+CALL write_space
+CALL write_space
+CALL write_0
+CALL write_space
+CALL write_space
+CALL write_0
+CALL write_space
+CALL write_space
+CALL write_space
+CALL write_space
+CALL write_space
+CALL write_space
+CALL write_space
+CALL write_0
+CALL write_space
+CALL write_space
+CALL write_0
+CALL write_space
+CALL write_space
+CALL write_space
+CALL write_space
+CALL write_space
+CALL write_0
+CALL write_space
+CALL write_space
+CALL write_space
+CALL write_space
+CALL write_0
+CALL write_0
+CALL write_0
+CALL write_0
+CALL write_0
+ROUT
 HLT
+
+
+write_0:
+    PUSH 111
+    CALL count
+    RET
+
+write_space:
+    PUSH 32
+    CALL count
+    RET
+
+new_line:
+    PUSH 0
+    CALL count
+    RET
+
+
+count:
+    POP [ax]
+    PUSH ax
+    PUSH 1
+    ADD
+    POP ax
+    RET

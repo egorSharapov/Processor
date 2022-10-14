@@ -1,0 +1,29 @@
+PUSH 1
+POP bx
+
+IN
+POP ax
+
+PUSH ax
+PUSH 0
+JB factorial
+PUSH -1
+JMP end
+
+factorial:
+PUSH bx
+PUSH ax
+MUL
+POP bx
+PUSH -1+ax
+POP ax
+PUSH ax
+PUSH 0
+JE end
+CALL factorial
+
+
+end:
+    PUSH bx
+    OUT 
+    HLT
