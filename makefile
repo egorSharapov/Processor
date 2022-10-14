@@ -1,60 +1,44 @@
-# Это комментарий, который говорит, что переменная CC указывает компилятор, используемый для сборки
-CC=g++
-#Это еще один комментарий. Он поясняет, что в переменной CFLAGS лежат флаги, которые передаются компилятору
-CFLAGS = 	-Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equal -Winline -Wunreachable-code -Wmissing-declarations 		\
+CFLAGS =    -Wshadow -Winit-self -Wredundant-decls -Wcast-align -Wundef -Wfloat-equal -Winline -Wunreachable-code -Wmissing-declarations 		\
 		  	-Wmissing-include-dirs -Wswitch-enum -Wswitch-default -Weffc++ -Wmain -Wextra -Wall -g -pipe -fexceptions -Wcast-qual -Wconversion	\
 			-Wctor-dtor-privacy -Wempty-body -Wformat-security -Wformat=2 -Wignored-qualifiers -Wlogical-op -Wmissing-field-initializers 		\
 			-Wnon-virtual-dtor -Woverloaded-virtual -Wpointer-arith -Wsign-promo -Wstrict-aliasing -Wstrict-null-sentinel -Wtype-limits         \
 			-Wwrite-strings -D_EJUDGE_CLIENT_SIDE
 
-OBJ_FOLDER = object_files/
+CC = g++
 
-all: assembler disassembler
+OBJ_FOLDER = release/
 
-assembler: file_analyze.o asm.o main_assembler.o
-	$(CC) $(OBJ_FOLDER)file_analyze.o  $(OBJ_FOLDER)asm.o $(OBJ_FOLDER)main_assembler.o -o assembler
+all: assembler disassembler processor
 
-
-asm.o: 
-	$(CC) -c $(CFLAGS) assembler/assembler.cpp -o $(OBJ_FOLDER)asm.o
-
-file_analyze.o:
-	$(CC) -c $(CFLAGS) assembler/file_analyze.cpp -o $(OBJ_FOLDER)file_analyze.o
-
-main_assembler.o:
-	$(CC) -c $(CFLAGS) assembler/main.cpp -o $(OBJ_FOLDER)main_assembler.o
+assembler: $(OBJ_FOLDER)file_analyze.o $(OBJ_FOLDER)assembler.o $(OBJ_FOLDER)main_assembler.o
+	$(CC) $^ -o $@
 
 
-
-disassembler: disasm.o main_disassembler.o
-	$(CC)  $(OBJ_FOLDER)disasm.o $(OBJ_FOLDER)main_disassembler.o -o $(OBJ_FOLDER)disassembler
-
-
-disasm.o: 
-	$(CC) -c $(CFLAGS) disassembler/disassembler.cpp -o $(OBJ_FOLDER)disasm.o
-
-main_disassembler.o:
-	$(CC) -c $(CFLAGS) disassembler/main.cpp -o $(OBJ_FOLDER)main_disassembler.o
+$(OBJ_FOLDER)%.o: assembler/%.cpp
+	$(CC) -c  $(CFLAGS) $< -o $@
 
 
-processor: cpu.o main_cpu.o stack.o check_stack.o
-	$(CC) $(OBJ_FOLDER)cpu.o  $(OBJ_FOLDER)main_cpu.o $(OBJ_FOLDER)stack.o $(OBJ_FOLDER)check_stack.o -o processor
+disassembler: $(OBJ_FOLDER)disassembler.o $(OBJ_FOLDER)main_disassembler.o
+	$(CC) $^ -o $@
 
-cpu.o:
-	$(CC) -c $(CFLAGS) cpu/cpu.cpp -o $(OBJ_FOLDER)cpu.o
 
-main_cpu.o:
-	$(CC) -c $(CFLAGS) cpu/main.cpp -o $(OBJ_FOLDER)main_cpu.o
+$(OBJ_FOLDER)%.o: disassembler/%.cpp
+	$(CC) -c  $(CFLAGS) $< -o $@
 
-check_stack.o:
-	$(CC) -c $(CFLAGS) cpu/stack/check_stack.cpp -o $(OBJ_FOLDER)check_stack.o
 
-stack.o:
-	$(CC) -c $(CFLAGS) cpu/stack/stack_functions.cpp -o $(OBJ_FOLDER)stack.o
+
+processor: $(OBJ_FOLDER)cpu.o  $(OBJ_FOLDER)main_cpu.o $(OBJ_FOLDER)stack.o $(OBJ_FOLDER)check_stack.o
+	$(CC)  $^ -o $@
+
+$(OBJ_FOLDER)%.o: cpu/%.cpp
+	$(CC) -c  $(CFLAGS) $< -o $@
+
+
+$(OBJ_FOLDER)check_stack.o:
+	$(CC) -c $(CFLAGS) cpu/stack/check_stack.cpp -DDEBUG -o $@
+
+$(OBJ_FOLDER)stack.o:
+	$(CC) -c $(CFLAGS) cpu/stack/stack_functions.cpp -o $@
 
 open:
-	$(CC) open.cpp -o open
-
-
-# clean:
-# 	rm -rf $(OBJ_FOLDER)*.o
+	$(CC) $(CFLAGS) open.cpp -o $@
