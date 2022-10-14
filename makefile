@@ -8,33 +8,32 @@ CC = g++
 
 OBJ_FOLDER = release/
 
-.PHONY : assembler disassembler processor all
-all: assembler disassembler processor
+.PHONY : all
+
+all: assembler disassembler processor cpu/stack/
 
 VPATH := assembler disassembler cpu cpu/stack
 
 assembler: $(OBJ_FOLDER)file_analyze.o $(OBJ_FOLDER)assembler.o $(OBJ_FOLDER)main_assembler.o
 	$(CC) $^ -o $@
 
-
-$(OBJ_FOLDER)%.o: %.cpp
-	$(CC) -c  $(CFLAGS) $< -o $@
-
-
 disassembler: $(OBJ_FOLDER)disassembler.o $(OBJ_FOLDER)main_disassembler.o
 	$(CC) $^ -o $@
-
-
-$(OBJ_FOLDER)%.o: %.cpp
-	$(CC) -c  $(CFLAGS) $< -o $@
-
 
 
 processor: $(OBJ_FOLDER)cpu.o  $(OBJ_FOLDER)main_cpu.o $(OBJ_FOLDER)stack.o $(OBJ_FOLDER)check_stack.o
 	$(CC)  $^ -o $@
 
+
 $(OBJ_FOLDER)%.o: %.cpp
 	$(CC) -c  $(CFLAGS) $< -o $@
+
+
+$(OBJ_FOLDER)check_stack.o:
+	$(CC) -c $(CFLAGS) cpu/stack/check_stack.cpp -DDEBUG -o $@
+
+$(OBJ_FOLDER)stack.o:
+	$(CC) -c $(CFLAGS) cpu/stack/stack_functions.cpp -o $@
 
 
 open:
