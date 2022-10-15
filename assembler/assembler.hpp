@@ -20,6 +20,8 @@
     free (source.source);         \
     free (source.code);
     
+const char version = 2;
+
 typedef struct
 {
     int   mark_ip   = 0;

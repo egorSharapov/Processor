@@ -42,9 +42,9 @@ void set_reg          (char *code, int *ip, const char *reg);
 void set_val          (char *code, int *ip, const int val);
 bool is_ram           (char *arg_point);
 void set_args         (char *arg_point, char *code, int *ip);
-char *skip_space      (char *pointer);
+char *to_arg          (char *pointer);
 
 ERRORS_CODE count_and_read (const char *file_name, Text * text);
-
+char * create_dir_name (const char *file_path, const char *file_name);
 
 #endif

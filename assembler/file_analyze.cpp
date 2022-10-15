@@ -5,6 +5,7 @@
 #include <malloc.h>
 #include "file_analyze.hpp"
 #include "C:\Users\Egor\projects\processor\enum_args.hpp"
+#include <assert.h>
 
 //--------------------------------------------------------------------------------------------------------------------
 
@@ -57,7 +58,7 @@ ERRORS_CODE count_and_read (const char *file_name, Text * text)
 
     long file_size = file_size_count (file_name);
     
-    text->source = (char *) calloc (2*(file_size + 2), sizeof (char));
+    text->source = (char *) calloc ((file_size + 2), sizeof (char));
 
     if (text->source == NULL)
         return NO_MEM_ERROR;
@@ -70,7 +71,6 @@ ERRORS_CODE count_and_read (const char *file_name, Text * text)
     counting_strings (text);
 
     text->code = (char*) calloc ((text->count_of_strings)*(4*sizeof (char) + sizeof (int)), 1);
-
 
     if (text->code == NULL)
     {
@@ -93,7 +93,7 @@ void create_pointers (Text * text)
 {
     assert (text);
 
-    text->command_args = (Line *) calloc (text->count_of_strings, sizeof (Line));
+    text->command_args = (Line *) calloc (text->count_of_strings + 1, sizeof (Line));
     int index_of_string = 0;
     char * point = text->source;
     
@@ -127,6 +127,7 @@ char is_register  (const char *reg)
     return 0;
 }
 
+//--------------------------------------------------------------------------------------------------------------------
 
 void set_reg (char *code, int *ip, const char *reg)
 {
@@ -150,6 +151,7 @@ void set_val (char *code, int *ip, const int val)
     *ip += sizeof (int);
 }
 
+//--------------------------------------------------------------------------------------------------------------------
 
 bool is_ram (char *arg_point)
 {
@@ -166,6 +168,7 @@ bool is_ram (char *arg_point)
     return false;
 }
 
+//--------------------------------------------------------------------------------------------------------------------
 
 void set_args (char *arg_point, char *code, int *ip)
 {
@@ -186,8 +189,6 @@ void set_args (char *arg_point, char *code, int *ip)
             
         *ip += sizeof (char);
 
-        code[*ip] = CMD_ADD;
-        *ip += sizeof (char);
     }
     else if (sscanf (arg_point, "%d", &val) == 1)
         set_val (code, ip, val);   
@@ -196,11 +197,30 @@ void set_args (char *arg_point, char *code, int *ip)
         set_reg (code, ip, reg);
 }
 
-char *skip_space (char *pointer)
+//--------------------------------------------------------------------------------------------------------------------
+
+char *to_arg (char *pointer)
 {
     while (*pointer == ' ')
         pointer++;
     return pointer;
 }
 
+//--------------------------------------------------------------------------------------------------------------------
+
+char * create_dir_name (const char *file_path, const char *file_name)
+{
+    assert (file_path);
+    assert (file_name);
+
+    char *file_dir = (char *) calloc (strlen (file_path) + strlen (file_name) + 1, sizeof (char));
+
+    if (file_dir == NULL)
+        printf ("calloc error");
+
+    strcpy (file_dir, file_path);
+    strcat (file_dir, file_name);
+
+    return file_dir;
+}
 
